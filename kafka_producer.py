@@ -3,6 +3,7 @@ from flask import Flask
 import pandas as pd
 import json
 import threading
+import time
 
 # Kafka Producer settings
 # Creating a Producer to send data to Kafka.
@@ -20,7 +21,7 @@ app = Flask(__name__)
 def produce_csv_data():
     # Reading a local CSV file. Example file name: 'data.csv'.
     # The encoding parameter is used to prevent character encoding issues (ISO-8859-1).
-    data = pd.read_csv('C:/Users/90533/Desktop/data.csv', encoding='ISO-8859-1')
+    data = pd.read_csv('S:/programming/kafka_project/data.csv', encoding='ISO-8859-1')
 
     # Iterating through the data to send each row to Kafka.
     for _, row in data.iterrows():
@@ -85,10 +86,10 @@ def produce_csv_data():
         try:
             producer.send('deneme2', order_data)  # Sending data to Kafka topic 'deneme2'.
             print(f"Data sent: {order_data}")  # Logging the sent data to the console.
+            time.sleep(0.01)
         except Exception as e:
             print(f"Message sending error: {e}")  # Logging any errors during sending.
-        # time.sleep(0.01)  # Optional delay between sends can be added.
-
+        
 if __name__ == '__main__':
     # Running the Kafka producer in a separate thread.
     threading.Thread(target=produce_csv_data, daemon=True).start()
