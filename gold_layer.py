@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, sum, avg, current_timestamp
+import os
 from dotenv import load_dotenv
 load_dotenv()
 
