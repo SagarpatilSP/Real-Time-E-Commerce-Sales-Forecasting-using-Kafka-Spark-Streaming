@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, year, month, dayofmonth
+import os
 from dotenv import load_dotenv
 load_dotenv()
 
