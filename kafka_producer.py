@@ -4,6 +4,8 @@ import pandas as pd
 import json
 import threading
 import time
+from datetime import datetime
+import uuid
 
 # Kafka Producer settings
 # Creating a Producer to send data to Kafka.
@@ -11,7 +13,13 @@ import time
 # value_serializer: Converts the data into JSON format and encodes it.
 producer = KafkaProducer(
     bootstrap_servers='localhost:9092',  # Kafka Broker address (running on localhost)
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')  # Serialize data to JSON format
+    value_serializer=lambda v: json.dumps(v).encode('utf-8'),  # Serialize data to JSON format
+    key_serializer=lambda k: str(k).encode('utf-8'),
+    acks='all',
+    retries=5,
+    linger_ms=10
+    # batch_size=16384,
+    # compression_type='gzip'
 )
 
 # Initializing the Flask application.
@@ -79,13 +87,14 @@ def produce_csv_data():
             'Product_Price': row['Product Price'],  # Product price
             'Product_Status': row['Product Status'],  # Product status
             'Shipping_Date': row['shipping date (DateOrders)'],  # Shipping date
-            'Shipping_Mode': row['Shipping Mode']  # Shipping mode
+            'Shipping_Mode': row['Shipping Mode'],  # Shipping mode    
+            
+            'Event_id' : str(uuid.uuid4()),          # unique id for each event
+            'Event_time' : datetime.utcnow().isoformat()
         }
-
-        # Sending data to Kafka
+    
         try:
-            producer.send('deneme2', order_data)  # Sending data to Kafka topic 'deneme2'.
-            print(f"Data sent: {order_data}")  # Logging the sent data to the console.
+            producer.send('Mytopic',value = order_data,key=row['Customer Id']) # Sending data to Kafka topic 'deneme2'.
             time.sleep(0.01)
         except Exception as e:
             print(f"Message sending error: {e}")  # Logging any errors during sending.
