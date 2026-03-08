@@ -1,10 +1,17 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, year, month, dayofmonth
+from dotenv import load_dotenv
+load_dotenv()
+
+AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+BUCKET = os.getenv("BUCKET_NAME")
+
 
 spark = SparkSession.builder \
     .appName("Silver Layer Processing") \
-    .config("spark.jars.packages",
-            "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3") \
+    .config("spark.hadoop.fs.s3a.access.key", AWS_ACCESS_KEY)\
+    .config("spark.hadoop.fs.s3a.secret.key", AWS_SECRET_KEY)\
     .getOrCreate()
 
 # Read bronze data as stream
