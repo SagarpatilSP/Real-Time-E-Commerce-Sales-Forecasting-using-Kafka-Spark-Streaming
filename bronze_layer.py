@@ -3,43 +3,22 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType, 
 from pyspark.sql import SparkSession
 from pyspark.sql.types import TimestampType
 from pyspark.sql.functions import from_json, col, current_timestamp, year, month, dayofmonth
-
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
-import getpass
-
-
-
-
-# Folder to store plot outputs
-output_folder = "plots"
-
-# If the output folder exists, delete and recreate it
-if os.path.exists(output_folder):
-    shutil.rmtree(output_folder)
-os.makedirs(output_folder)
-
+AWS_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+BUCKET = os.getenv("BUCKET_NAME")
 
 # Function to start the Spark streaming session
 def start_spark_streaming():
-    global batch_counter, lr_model  # Define global variables here
-
     # Initialize a Spark session with Kafka package for streaming
     spark = SparkSession.builder \
         .appName("Bronze") \
-        .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.3") \
+        .config("spark.hadoop.fs.s3a.access.key", AWS_ACCESS_KEY)\
+        .config("spark.hadoop.fs.s3a.secret.key", AWS_SECRET_KEY)\
         .getOrCreate()
-    
-    
-    access_key = input("Enter AWS Access Key: ")
-    secret_key = getpass.getpass("Enter AWS Secret Key: ")
-    
-    spark._jsc.hadoopConfiguration().set("fs.s3a.access.key", access_key)
-    spark._jsc.hadoopConfiguration().set("fs.s3a.secret.key", secret_key)
-
-    # Print Kafka server and topic information
-    print("Kafka bootstrap servers:", spark.conf.get("kafka.bootstrap.servers", "localhost:9092"))
-    print("Kafka topic:", "Mytopic")
 
     # Define the schema of the incoming data
     sensor_schema = StructType([
